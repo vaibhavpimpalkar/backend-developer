@@ -112,4 +112,54 @@ let players=[
 
 
 
+
+
+ let persons=[
+    {
+        name: "pk",       
+        age: 10,
+        votingStatus : false
+        
+        
+    },
+    {
+        name: "sk",
+        age: 20,
+        votingStatus : false
+       
+    },
+    {
+                                 
+        name: "ac",   
+        age: 70,                       
+        votingStatus : false                 
+         
+    },
+    {
+        name: "aa",
+        age: 5,
+        votingStatus : false
+                
+    },
+    {
+        name: "ho",
+        age: 40,
+        votingStatus : false
+       
+    }]
+
+  router.post('/voting',function(req,res){
+    let input = req.query.age
+
+let newVote = []
+    for (let i = 0 ; i < persons.length ;i++){
+        if(persons[i].age>input){
+            persons[i].votingStatus=true
+            newVote.push(persons[i])
+
+        }
+    }
+    res.send({data :newVote  ,  status : true})
+  })
+  
 module.exports = router;
