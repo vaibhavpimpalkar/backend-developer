@@ -4,6 +4,12 @@ const userController= require("../Controller/userController")
 const bookController= require("../Controller/bookController")
 const reviewController= require("../Controller/reviewController")
 const mid = require("../middlewares/auth.js")
+const aws = require('aws-sdk')
+
+
+router.post("/write-file-aws",bookController.awsLink)
+
+
 
 router.post("/register", userController.createUser)
 router.post("/logIn", userController.logIn)

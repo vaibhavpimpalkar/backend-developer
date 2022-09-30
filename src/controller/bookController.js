@@ -3,13 +3,72 @@ const reviewModel = require("../models/reviewModel.js")
 const userModel = require('../models/userModel')
 const {validBookTitle,validExcerpt,validISBN,validCategory,
     validReviews,validDate,validBody,validId} = require("../validator/validator.js")
+const aws = require("aws-sdk")
+
+
+aws.config.update({
+
+    accessKeyId : "AKIAY3L35MCRZNIRGT6N",
+    secretAccessKey : "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",
+    region : "ap-south-1"
+})
+
+let uploadFile= async ( file) =>{
+    return new Promise( function(resolve, reject) {
+    
+     let s3= new aws.S3({apiVersion: '2006-03-01'}); 
+ 
+     var uploadParams= {
+         ACL: "public-read",
+         Bucket: "classroom-training-bucket",  
+         Key: "book/" + file.originalname,  
+         Body: file.buffer
+     }
+        s3.upload( uploadParams, function (err, data ){
+            if(err) {
+                return reject({"error": err})
+            }
+            // console.log(data)
+            // console.log("file uploaded succesfully")
+            return resolve(data.Location)
+        })
+
+
+        
+   })
+}
+
+const awsLink = async function(req, res){
+
+    try{
+        let files= req.files
+        if(files && files.length>0){
+            //upload to s3 and get the uploaded link
+            // res.send the link back to frontend/postman
+            let uploadedFileURL= await uploadFile( files[0] )
+            res.status(201).send({msg: "file uploaded succesfully", data: uploadedFileURL})
+        }
+        else{
+            res.status(400).send({ msg: "No file found" })
+        }
+        
+    }
+    catch(err){
+        res.status(500).send({msg: err})
+    }
+    
+}
+
+
+
+
 
 const createBook = async function (req,res) {
     try {
         let data = req.body
         // ---------- validation start -----------------
         if (!validBody(data)) return res.status(400).send({ status: false, message: "Request body can't be empty" })
-        let {title,excerpt,userId,ISBN,category,subcategory,reviews,releasedAt} =  data
+        let {title,excerpt,userId,ISBN,category,subcategory,reviews,releasedAt,bookCover} =  data
         if(!title) return res.status(400).send({ status: false, message: "Please provide book title"})
         if (!validBookTitle(title)) return res.status(400).send({ status: false,message: "Please provide title in valid format" })
         let titleExist = await bookModel.findOne({title:title})
@@ -33,6 +92,12 @@ const createBook = async function (req,res) {
         }
         if(!releasedAt) return res.status(400).send({ status: false, message: "Please provide release date"})
         if (!validDate(releasedAt)) return res.status(400).send({ status: false,message: "Please provide releasedAt in Date format" })
+
+        if(!bookCover){
+            return res.status(400).send({status : false , msg : "please provide book cover"})
+        }
+
+
         // --------------- end ------------------------
         // --------------- authorization --------------
         if(userId.toString() !== req.tokenUserId) return res.status(403).send({status: false,message:"Access denied"})
@@ -136,4 +201,4 @@ const deleteBook = async function(req,res){
     }
 }
 
-module.exports = {createBook,getBooks,getBookById,updateBook,deleteBook}
+module.exports = {awsLink,createBook,getBooks,getBookById,updateBook,deleteBook}

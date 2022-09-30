@@ -5,7 +5,7 @@ const bookSchema = new mongoose.Schema({
   title: {
     type: String,
     required: true,
-    unique:true,
+    unique: true,
     trim: true
   },
   excerpt: {
@@ -38,8 +38,8 @@ const bookSchema = new mongoose.Schema({
     type: Number,
     default: 0
   },
-  deletedAt:{
-    type:Date
+  deletedAt: {
+    type: Date
   },
   isDeleted: {
     type: Boolean,
@@ -48,7 +48,11 @@ const bookSchema = new mongoose.Schema({
   releasedAt: {
     type: Date,
     required: true
+  },
+  bookCover: {
+    type: String,
+    required: true
   }
-},{ timestamps: true })
+}, { timestamps: true })
 
 module.exports = mongoose.model("book", bookSchema)
